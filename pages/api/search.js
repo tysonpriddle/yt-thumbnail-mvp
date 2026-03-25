@@ -30,14 +30,36 @@ export default async function handler(req, res) {
       },
     });
 
-    const results = searchResponse.data.items.map((item) => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-      channel: item.snippet.channelTitle,
-      thumbnail: item.snippet.thumbnails.medium.url,
-      description: item.snippet.description,
-      publishedAt: item.snippet.publishedAt,
-    }));
+    const decodeHtmlEntities = (str) => {
+      const entities = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&#x27;': "'",
+      };
+      return str.replace(/&[a-z]+;/g, (match) => entities[match] || match);
+    };
+
+    const results = searchResponse.data.items
+      .filter((item) => item.id.videoId) // Only videos, not channels/playlists
+      .map((item) => ({
+        id: item.id.videoId,
+        title: decodeHtmlEntities(item.snippet.title),
+        channel: decodeHtmlEntities(item.snippet.channelTitle),
+        thumbnail: item.snippet.thumbnails.medium.url,
+        description: decodeHtmlEntities(item.snippet.description),
+        publishedAt: item.snippet.publishedAt,
+      }))
+      .reduce((unique, item) => {
+        // Deduplicate by videoId
+        if (!unique.find((v) => v.id === item.id)) {
+          unique.push(item);
+        }
+        return unique;
+      }, [])
+      .slice(0, 8); // Return max 8 results
 
     return res.status(200).json({ results });
   } catch (error) {

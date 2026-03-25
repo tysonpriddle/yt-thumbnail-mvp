@@ -50,7 +50,7 @@ export default function Home() {
           <div className={styles.landingContent}>
             <h1 className={styles.hero}>See how your thumbnail compares</h1>
             <p className={styles.subtitle}>
-              Upload your YouTube thumbnail and see exactly how it stacks up against real search results
+              See if your thumbnail stands out before you go live
             </p>
             
             <button 
@@ -164,7 +164,7 @@ export default function Home() {
     return (
       <div className={styles.container}>
         <div className={styles.resultsContainer}>
-          <h2>Here's how your thumbnail performs</h2>
+          <h2>Your thumbnail vs. what's already ranking. Does it compete?</h2>
           <p className={styles.stepCounter}>Step 3 of 3</p>
 
           <div className={styles.resultsGrid}>
@@ -172,7 +172,7 @@ export default function Home() {
             <div className={`${styles.thumbnailCard} ${styles.userThumbnail}`}>
               <img src={thumbnail} alt="Your thumbnail" />
               <div className={styles.cardLabel}>YOUR THUMBNAIL</div>
-              <p className={styles.cardTitle}>Your video title here</p>
+              <p className={styles.cardTitle}>Your video</p>
             </div>
 
             {/* YouTube Results */}
