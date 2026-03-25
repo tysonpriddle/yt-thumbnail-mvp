@@ -35,21 +35,12 @@
   line-height: 1.7;
 }
 
-.socialProof {
-  margin: 60px 0 20px;
+.pricingTeaser {
+  margin-top: 60px;
+  color: var(--text-secondary);
   padding: 20px;
   border-top: 1px solid var(--dark-border);
   border-bottom: 1px solid var(--dark-border);
-}
-
-.socialProof p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-.pricingTeaser {
-  margin-top: 30px;
-  color: var(--text-secondary);
 }
 
 .pricingTeaser strong {

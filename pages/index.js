@@ -60,10 +60,6 @@ export default function Home() {
               Start Preview
             </button>
 
-            <div className={styles.socialProof}>
-              <p>Trusted by 500+ creators</p>
-            </div>
-
             <div className={styles.pricingTeaser}>
               <p>Free or <strong>Pro at $9/month</strong></p>
             </div>
