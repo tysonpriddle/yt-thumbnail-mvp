@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 
 export default function Home() {
@@ -45,7 +46,12 @@ export default function Home() {
   // Landing Page
   if (currentStep === 'landing') {
     return (
-      <div className={styles.container}>
+      <>
+        <Head>
+          <title>ThumbCheck - YouTube Thumbnail Previewer</title>
+          <meta name="description" content="Upload your YouTube thumbnail and see if it stands out in search results. Get instant visual feedback before you go live." />
+        </Head>
+        <div className={styles.container}>
         <div className={styles.landing}>
           <div className={styles.landingContent}>
             <h1 className={styles.hero}>See how your thumbnail compares</h1>
@@ -66,13 +72,18 @@ export default function Home() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   // Upload Page
   if (currentStep === 'upload') {
     return (
-      <div className={styles.container}>
+      <>
+        <Head>
+          <title>Upload Thumbnail - ThumbCheck</title>
+        </Head>
+        <div className={styles.container}>
         <div className={styles.uploadContainer}>
           <h2>Upload your thumbnail</h2>
           <p className={styles.stepCounter}>Step 1 of 3</p>
@@ -99,13 +110,18 @@ export default function Home() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 
   // Search Page
   if (currentStep === 'search') {
     return (
-      <div className={styles.container}>
+      <>
+        <Head>
+          <title>Search - ThumbCheck</title>
+        </Head>
+        <div className={styles.container}>
         <div className={styles.searchContainer}>
           <h2>What are you searching for?</h2>
           <p className={styles.stepCounter}>Step 2 of 3</p>
@@ -156,13 +172,18 @@ export default function Home() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 
   // Results Page
   if (currentStep === 'results') {
     return (
-      <div className={styles.container}>
+      <>
+        <Head>
+          <title>Results - ThumbCheck</title>
+        </Head>
+        <div className={styles.container}>
         <div className={styles.resultsContainer}>
           <h2>Your thumbnail vs. what's already ranking. Does it compete?</h2>
           <p className={styles.stepCounter}>Step 3 of 3</p>
@@ -218,13 +239,18 @@ export default function Home() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 
   // Upgrade Page
   if (currentStep === 'upgrade') {
     return (
-      <div className={styles.container}>
+      <>
+        <Head>
+          <title>Upgrade to Pro - ThumbCheck</title>
+        </Head>
+        <div className={styles.container}>
         <div className={styles.upgradeModal}>
           <h2>Unlock Pro</h2>
 
@@ -259,6 +285,7 @@ export default function Home() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 }
