@@ -2,6 +2,7 @@
 
 Upload your YouTube thumbnail and see how it compares to real search results.
 
+
 ## Features
 - Upload custom thumbnail images
 - Search YouTube for any topic
