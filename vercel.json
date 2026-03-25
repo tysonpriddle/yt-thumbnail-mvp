@@ -2,9 +2,6 @@
   "name": "yt-thumbnail-mvp",
   "version": 2,
   "public": false,
-  "env": {
-    "YOUTUBE_API_KEY": "@youtube_api_key"
-  },
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install"
