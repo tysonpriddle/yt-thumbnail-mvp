@@ -54,9 +54,9 @@ export default function Home() {
         <div className={styles.container}>
         <div className={styles.landing}>
           <div className={styles.landingContent}>
-            <h1 className={styles.hero}>See how your thumbnail compares</h1>
+            <h1 className={styles.hero}>Know if your thumbnail will stand out</h1>
             <p className={styles.subtitle}>
-              See if your thumbnail stands out before you go live
+              Upload your design and see it side-by-side with real YouTube search results. Make confident edits before you publish.
             </p>
             
             <button 

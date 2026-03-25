@@ -5,6 +5,8 @@ export default function Document() {
     <Html lang="en">
       <Head>
         <meta charset="utf-8" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
         <meta property="og:title" content="ThumbCheck - YouTube Thumbnail Previewer" />
         <meta property="og:description" content="Upload your YouTube thumbnail and see if it stands out in search results. Get instant visual feedback before you go live." />
         <meta property="og:type" content="website" />
