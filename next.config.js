@@ -7,3 +7,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+// Favicon cache bust Wed Mar 25 23:59:48 UTC 2026
