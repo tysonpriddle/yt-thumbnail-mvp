@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
+import styles from '../styles/Home.module.css';
 
 export default function Home() {
+  const [currentStep, setCurrentStep] = useState('landing'); // landing, upload, search, results, upgrade
   const [thumbnail, setThumbnail] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -9,11 +11,12 @@ export default function Home() {
   const [error, setError] = useState('');
 
   const handleThumbnailUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         setThumbnail(event.target.result);
+        setCurrentStep('search');
       };
       reader.readAsDataURL(file);
     }
@@ -30,6 +33,7 @@ export default function Home() {
         query: searchQuery,
       });
       setResults(response.data.results || []);
+      setCurrentStep('results');
     } catch (err) {
       setError('Failed to search. Try again.');
       console.error(err);
@@ -38,78 +42,227 @@ export default function Home() {
     }
   };
 
-  return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>YouTube Thumbnail Preview Tool</h1>
-      <p>See how your thumbnail stacks up against real YouTube results</p>
+  // Landing Page
+  if (currentStep === 'landing') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.landing}>
+          <div className={styles.landingContent}>
+            <h1 className={styles.hero}>See how your thumbnail compares</h1>
+            <p className={styles.subtitle}>
+              Upload your YouTube thumbnail and see exactly how it stacks up against real search results
+            </p>
+            
+            <button 
+              className={styles.ctaButton}
+              onClick={() => setCurrentStep('upload')}
+            >
+              Start Preview
+            </button>
 
-      <div style={{ marginBottom: '30px' }}>
-        <h2>1. Upload Your Thumbnail</h2>
-        <input type="file" accept="image/*" onChange={handleThumbnailUpload} />
-        {thumbnail && (
-          <div style={{ marginTop: '10px' }}>
-            <img src={thumbnail} alt="Uploaded" style={{ maxWidth: '320px', border: '2px solid #ccc' }} />
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginBottom: '30px' }}>
-        <h2>2. Search YouTube</h2>
-        <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="e.g., 'React tutorial', 'Gaming highlights'"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ padding: '10px', width: '300px', fontSize: '16px' }}
-          />
-          <button type="submit" style={{ padding: '10px 20px', marginLeft: '10px', fontSize: '16px' }}>
-            Search
-          </button>
-        </form>
-      </div>
-
-      {loading && <p>Searching YouTube...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {results.length > 0 && thumbnail && (
-        <div>
-          <h2>3. Preview Among Results</h2>
-          <p>Your thumbnail (top left) compared to real results:</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '15px' }}>
-            {/* Your thumbnail */}
-            <div style={{ border: '3px solid #ff6b6b', padding: '10px', background: '#ffe0e0' }}>
-              <img src={thumbnail} alt="Your thumbnail" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }} />
-              <p style={{ margin: '10px 0', fontWeight: 'bold' }}>YOUR THUMBNAIL</p>
-              <p style={{ margin: '5px 0', fontSize: '12px', color: '#666' }}>Your video title here</p>
+            <div className={styles.socialProof}>
+              <p>Trusted by 500+ creators</p>
             </div>
 
-            {/* YouTube results */}
+            <div className={styles.pricingTeaser}>
+              <p>Free or <strong>Pro at $9/month</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Upload Page
+  if (currentStep === 'upload') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.uploadContainer}>
+          <h2>Upload your thumbnail</h2>
+          <p className={styles.stepCounter}>Step 1 of 3</p>
+
+          <label className={styles.uploadZone}>
+            <div className={styles.uploadContent}>
+              <div className={styles.uploadIcon}>📤</div>
+              <p className={styles.uploadText}>Drag and drop or click to select</p>
+              <p className={styles.uploadHint}>JPG, PNG, WEBP up to 5MB</p>
+            </div>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleThumbnailUpload}
+              style={{ display: 'none' }}
+            />
+          </label>
+
+          <button 
+            className={styles.secondaryButton}
+            onClick={() => setCurrentStep('landing')}
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Search Page
+  if (currentStep === 'search') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.searchContainer}>
+          <h2>What are you searching for?</h2>
+          <p className={styles.stepCounter}>Step 2 of 3</p>
+
+          {thumbnail && (
+            <div className={styles.thumbnailPreview}>
+              <img src={thumbnail} alt="Your thumbnail" />
+              <button 
+                className={styles.changeButton}
+                onClick={() => {
+                  setThumbnail(null);
+                  setCurrentStep('upload');
+                }}
+              >
+                Change
+              </button>
+            </div>
+          )}
+
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              placeholder="e.g., 'React tutorial', 'Gaming highlights'"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+              autoFocus
+            />
+            <button type="submit" className={styles.ctaButton} disabled={loading}>
+              {loading ? 'Searching...' : 'See Results'}
+            </button>
+          </form>
+
+          {error && <p className={styles.error}>{error}</p>}
+
+          <div className={styles.suggestedSearches}>
+            <p>Try: "Python tutorial" • "Gaming highlights" • "React tips"</p>
+          </div>
+
+          <button 
+            className={styles.secondaryButton}
+            onClick={() => {
+              setThumbnail(null);
+              setCurrentStep('upload');
+            }}
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Results Page
+  if (currentStep === 'results') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.resultsContainer}>
+          <h2>Here's how your thumbnail performs</h2>
+          <p className={styles.stepCounter}>Step 3 of 3</p>
+
+          <div className={styles.resultsGrid}>
+            {/* User's Thumbnail */}
+            <div className={`${styles.thumbnailCard} ${styles.userThumbnail}`}>
+              <img src={thumbnail} alt="Your thumbnail" />
+              <div className={styles.cardLabel}>YOUR THUMBNAIL</div>
+              <p className={styles.cardTitle}>Your video title here</p>
+            </div>
+
+            {/* YouTube Results */}
             {results.map((video, idx) => (
-              <div key={idx} style={{ border: '1px solid #ddd', padding: '10px' }}>
-                <img
-                  src={video.thumbnail}
-                  alt={video.title}
-                  style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }}
-                />
-                <p style={{ margin: '10px 0', fontSize: '14px', fontWeight: 'bold' }}>{video.title}</p>
-                <p style={{ margin: '5px 0', fontSize: '12px', color: '#666' }}>{video.channel}</p>
+              <div key={idx} className={styles.thumbnailCard}>
+                <img src={video.thumbnail} alt={video.title} />
+                <p className={styles.cardTitle}>{video.title}</p>
+                <p className={styles.cardChannel}>{video.channel}</p>
               </div>
             ))}
           </div>
-        </div>
-      )}
 
-      <div style={{ marginTop: '50px', padding: '20px', background: '#f5f5f5', borderRadius: '8px' }}>
-        <h3>Pro Features (Coming Soon)</h3>
-        <ul>
-          <li>Unlimited searches (currently limited to 5/day)</li>
-          <li>A/B testing with multiple thumbnails</li>
-          <li>Color analysis & contrast suggestions</li>
-          <li>Competitor thumbnail library</li>
-        </ul>
-        <p>Upgrade to Pro: $9/month</p>
+          <div className={styles.ctaSection}>
+            <button 
+              className={styles.ctaButton}
+              onClick={() => {
+                setCurrentStep('search');
+                setSearchQuery('');
+                setResults([]);
+              }}
+            >
+              Try Another Search
+            </button>
+
+            <button 
+              className={styles.upgradeButton}
+              onClick={() => setCurrentStep('upgrade')}
+            >
+              Unlock Pro Features
+            </button>
+          </div>
+
+          <button 
+            className={styles.secondaryButton}
+            onClick={() => {
+              setThumbnail(null);
+              setCurrentStep('landing');
+              setSearchQuery('');
+              setResults([]);
+            }}
+          >
+            Start Over
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Upgrade Page
+  if (currentStep === 'upgrade') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.upgradeModal}>
+          <h2>Unlock Pro</h2>
+
+          <div className={styles.upgradeFeatures}>
+            <div className={styles.feature}>
+              <span>✓</span> Unlimited searches
+            </div>
+            <div className={styles.feature}>
+              <span>✓</span> A/B testing (compare 2-3 thumbnails)
+            </div>
+            <div className={styles.feature}>
+              <span>✓</span> Color contrast analysis
+            </div>
+            <div className={styles.feature}>
+              <span>✓</span> Competitor thumbnail library
+            </div>
+          </div>
+
+          <div className={styles.upgradePrice}>
+            <p className={styles.price}>$9<span>/month</span></p>
+          </div>
+
+          <button className={styles.ctaButton}>
+            Subscribe Now
+          </button>
+
+          <button 
+            className={styles.secondaryButton}
+            onClick={() => setCurrentStep('results')}
+          >
+            Maybe Later
+          </button>
+        </div>
+      </div>
+    );
+  }
 }
