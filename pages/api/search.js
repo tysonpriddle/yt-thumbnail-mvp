@@ -2,10 +2,15 @@ import axios from 'axios';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-// In-memory rate limiter (resets per deployment, but prevents immediate abuse)
+// In-memory rate limiters
 const requestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const RATE_LIMIT_MAX = 5; // 5 searches per minute per IP
+
+// Daily quota counter (resets at UTC midnight, approximate)
+const dailyQuotaKey = () => new Date().toISOString().split('T')[0];
+let dailyQuota = { date: dailyQuotaKey(), count: 0 };
+const DAILY_QUOTA_MAX = 80; // Leave buffer for errors
 
 function getRateLimitKey(ip) {
   return `${ip}:${Math.floor(Date.now() / RATE_LIMIT_WINDOW)}`;
@@ -33,6 +38,17 @@ function isRateLimited(ip) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Check daily quota
+  const today = dailyQuotaKey();
+  if (dailyQuota.date !== today) {
+    dailyQuota = { date: today, count: 0 };
+  }
+  if (dailyQuota.count >= DAILY_QUOTA_MAX) {
+    return res.status(503).json({ 
+      error: 'We\'re getting a lot of traffic today! The tool will reset at midnight UTC. Try again tomorrow.' 
+    });
   }
 
   // Rate limiting
@@ -109,6 +125,9 @@ export default async function handler(req, res) {
         return unique;
       }, [])
       .slice(0, 8); // Return max 8 results
+
+    // Increment daily quota counter
+    dailyQuota.count += 1;
 
     return res.status(200).json({ results });
   } catch (error) {

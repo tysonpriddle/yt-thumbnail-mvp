@@ -196,6 +196,7 @@
 }
 
 .thumbnailCard {
+  display: block;
   border: 1px solid var(--dark-border);
   border-radius: 8px;
   overflow: hidden;

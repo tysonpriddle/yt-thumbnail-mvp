@@ -198,11 +198,18 @@ export default function Home() {
 
             {/* YouTube Results */}
             {results.map((video, idx) => (
-              <div key={idx} className={styles.thumbnailCard}>
+              <a 
+                key={idx} 
+                href={`https://www.youtube.com/watch?v=${video.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.thumbnailCard}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <img src={video.thumbnail} alt={video.title} />
                 <p className={styles.cardTitle}>{video.title}</p>
                 <p className={styles.cardChannel}>{video.channel}</p>
-              </div>
+              </a>
             ))}
           </div>
 
