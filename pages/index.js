@@ -85,9 +85,13 @@ export default function Home() {
             </button>
 
             <div className={styles.pricingTeaser}>
-              <p>Free or <strong>Pro at $9/month</strong></p>
+              <p><strong>Free while in beta.</strong> Pro coming soon.</p>
             </div>
           </div>
+
+          <footer className={styles.footer}>
+            <a href="/privacy-policy">Privacy Policy</a> · <a href="/terms">Terms of Service</a>
+          </footer>
         </div>
       </div>
       </>
@@ -232,6 +236,10 @@ export default function Home() {
               </a>
             ))}
           </div>
+
+          <p className={styles.youtubeBranding}>
+            Results powered by <strong>YouTube</strong>. Click any thumbnail to watch the video.
+          </p>
 
           <div className={styles.ctaSection}>
             <button 
