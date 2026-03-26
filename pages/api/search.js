@@ -12,6 +12,34 @@ const dailyQuotaKey = () => new Date().toISOString().split('T')[0];
 let dailyQuota = { date: dailyQuotaKey(), count: 0 };
 const DAILY_QUOTA_MAX = 80; // Leave buffer for errors
 
+// Search result cache (24-hour TTL)
+const searchCache = new Map();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+function getCacheKey(query) {
+  return `search:${query.toLowerCase().trim()}`;
+}
+
+function getCachedResult(query) {
+  const key = getCacheKey(query);
+  const cached = searchCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.results;
+  }
+  if (cached) {
+    searchCache.delete(key); // Expired
+  }
+  return null;
+}
+
+function setCachedResult(query, results) {
+  const key = getCacheKey(query);
+  searchCache.set(key, {
+    results,
+    timestamp: Date.now(),
+  });
+}
+
 function getRateLimitKey(ip) {
   return `${ip}:${Math.floor(Date.now() / RATE_LIMIT_WINDOW)}`;
 }
@@ -73,6 +101,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'YouTube API key not configured' });
   }
 
+  // Check cache first
+  const cachedResults = getCachedResult(query);
+  if (cachedResults) {
+    return res.status(200).json({ results: cachedResults, cached: true });
+  }
+
   try {
     // Encode query properly for Unicode
     const encodedQuery = encodeURIComponent(query);
@@ -126,10 +160,13 @@ export default async function handler(req, res) {
       }, [])
       .slice(0, 8); // Return max 8 results
 
+    // Cache the results
+    setCachedResult(query, results);
+
     // Increment daily quota counter
     dailyQuota.count += 1;
 
-    return res.status(200).json({ results });
+    return res.status(200).json({ results, cached: false });
   } catch (error) {
     console.error('YouTube API error:', error.response?.status, error.message);
     

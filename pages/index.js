@@ -13,14 +13,32 @@ export default function Home() {
 
   const handleThumbnailUpload = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setThumbnail(event.target.result);
-        setCurrentStep('search');
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validation
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Please upload a valid image (JPG, PNG, WEBP, or GIF)');
+      return;
     }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError('Image too large. Maximum size is 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => {
+      setError('Failed to read file. Try again.');
+    };
+    reader.onload = (event) => {
+      setThumbnail(event.target.result);
+      setError('');
+      setCurrentStep('search');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSearch = async (e) => {
@@ -101,6 +119,8 @@ export default function Home() {
               style={{ display: 'none' }}
             />
           </label>
+
+          {error && <p className={styles.error}>{error}</p>}
 
           <button 
             className={styles.secondaryButton}
