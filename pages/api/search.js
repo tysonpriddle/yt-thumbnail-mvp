@@ -1,6 +1,31 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+const ANALYTICS_FILE = path.join(process.cwd(), '.analytics.json');
+
+function logSearch(query, cacheHit, resultsCount, ip) {
+  try {
+    let analytics = [];
+    if (fs.existsSync(ANALYTICS_FILE)) {
+      const data = fs.readFileSync(ANALYTICS_FILE, 'utf-8');
+      analytics = JSON.parse(data);
+    }
+
+    analytics.push({
+      timestamp: new Date().toISOString(),
+      query,
+      cacheHit,
+      resultsCount,
+      ip: ip ? ip.substring(0, 10) : 'unknown' // Partial IP for privacy
+    });
+
+    fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(analytics, null, 2));
+  } catch (err) {
+    console.error('Error logging analytics:', err);
+  }
+}
 
 // In-memory rate limiters
 const requestCounts = new Map();
@@ -80,7 +105,6 @@ export default async function handler(req, res) {
   }
 
   // Rate limiting
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
   if (isRateLimited(clientIp)) {
     return res.status(429).json({ error: 'Too many searches. Try again in a minute.' });
   }
@@ -101,11 +125,15 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'YouTube API key not configured' });
   }
 
+  // Get client IP
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
   // Check cache first
   const cachedResults = getCachedResult(query);
   if (cachedResults) {
     res.setHeader('X-Cache', 'HIT');
     res.setHeader('X-Cache-Key', getCacheKey(query));
+    logSearch(query, true, cachedResults.length, clientIp);
     return res.status(200).json({ results: cachedResults, cached: true });
   }
   res.setHeader('X-Cache', 'MISS');
@@ -169,6 +197,9 @@ export default async function handler(req, res) {
 
     // Increment daily quota counter
     dailyQuota.count += 1;
+
+    // Log analytics
+    logSearch(query, false, results.length, clientIp);
 
     return res.status(200).json({ results, cached: false });
   } catch (error) {
