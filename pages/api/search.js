@@ -104,8 +104,12 @@ export default async function handler(req, res) {
   // Check cache first
   const cachedResults = getCachedResult(query);
   if (cachedResults) {
+    res.setHeader('X-Cache', 'HIT');
+    res.setHeader('X-Cache-Key', getCacheKey(query));
     return res.status(200).json({ results: cachedResults, cached: true });
   }
+  res.setHeader('X-Cache', 'MISS');
+  res.setHeader('X-Cache-Key', getCacheKey(query));
 
   try {
     // Encode query properly for Unicode
@@ -172,7 +176,7 @@ export default async function handler(req, res) {
     
     // Return specific error messages
     if (error.response?.status === 403) {
-      return res.status(500).json({ error: 'API quota exceeded. Try again later.' });
+      return res.status(503).json({ error: 'API quota exceeded. Try again later.' });
     }
     if (error.response?.status === 400) {
       return res.status(400).json({ error: 'Invalid search query.' });

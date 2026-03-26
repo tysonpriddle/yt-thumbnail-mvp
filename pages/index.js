@@ -300,8 +300,22 @@ export default function Home() {
             <p className={styles.price}>$9<span>/month</span></p>
           </div>
 
-          <button className={styles.ctaButton}>
-            Subscribe Now
+          <button 
+            className={styles.ctaButton}
+            onClick={() => {
+              const email = prompt('Enter your email to join the Pro waitlist:');
+              if (email && email.includes('@')) {
+                fetch('/api/waitlist', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email }),
+                })
+                  .then(() => alert('Thanks! You\'re on the Pro waitlist.'))
+                  .catch(() => alert('Error. Try again.'));
+              }
+            }}
+          >
+            Join the Pro Waitlist
           </button>
 
           <button 

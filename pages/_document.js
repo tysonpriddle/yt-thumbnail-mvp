@@ -10,13 +10,13 @@ export default function Document() {
         <meta property="og:title" content="ThumbCheck - YouTube Thumbnail Previewer" />
         <meta property="og:description" content="Upload your YouTube thumbnail and see if it stands out in search results. Get instant visual feedback before you go live." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yt-thumbnail-mvp.vercel.app" />
-        <meta property="og:image" content="https://yt-thumbnail-mvp.vercel.app/og-image.png" />
+        <meta property="og:url" content="https://www.ytthumb.app" />
+        <meta property="og:image" content="https://www.ytthumb.app/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="ThumbCheck - YouTube Thumbnail Previewer" />
         <meta name="twitter:description" content="See if your thumbnail stands out before you go live." />
-        <meta name="twitter:image" content="https://yt-thumbnail-mvp.vercel.app/og-image.png" />
-        <link rel="canonical" href="https://yt-thumbnail-mvp.vercel.app" />
+        <meta name="twitter:image" content="https://www.ytthumb.app/og-image.png" />
+        <link rel="canonical" href="https://www.ytthumb.app" />
       </Head>
       <body>
         <Main />
