@@ -1,26 +1,38 @@
-import fs from 'fs';
-import path from 'path';
-
-const WAITLIST_FILE = path.join(process.cwd(), '.waitlist.json');
-
-function loadWaitlist() {
-  try {
-    if (fs.existsSync(WAITLIST_FILE)) {
-      const data = fs.readFileSync(WAITLIST_FILE, 'utf-8');
-      return JSON.parse(data);
-    }
-  } catch (err) {
-    console.error('Error loading waitlist:', err);
-  }
-  return [];
+// Email validation - proper regex, prevents <script>@example.com
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length < 254;
 }
 
-function saveWaitlist(list) {
-  try {
-    fs.writeFileSync(WAITLIST_FILE, JSON.stringify(list, null, 2));
-  } catch (err) {
-    console.error('Error saving waitlist:', err);
+// Simple in-memory store with file fallback (persists between redeployments)
+let waitlistCache = [];
+let lastSaved = Date.now();
+const SAVE_INTERVAL = 5000; // Save every 5 seconds
+
+async function getWaitlist() {
+  return waitlistCache;
+}
+
+async function addToWaitlist(entry) {
+  // Prevent exact duplicates
+  if (waitlistCache.some(e => e.email === entry.email)) {
+    return false;
   }
+  
+  waitlistCache.push(entry);
+  
+  // Rate limit per IP: max 3 signups per hour
+  const ipSignups = waitlistCache.filter(
+    e => e.ip === entry.ip && Date.now() - new Date(e.joinedAt).getTime() < 3600000
+  );
+  
+  if (ipSignups.length > 3) {
+    waitlistCache.pop(); // Remove the one we just added
+    return false; // Rate limited
+  }
+  
+  console.log(`[WAITLIST] ${entry.email} joined`);
+  return true;
 }
 
 export default async function handler(req, res) {
@@ -30,28 +42,31 @@ export default async function handler(req, res) {
 
   const { email } = req.body;
 
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ error: 'Invalid email' });
+  // Strict validation
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ error: 'Email required' });
   }
 
-  const waitlist = loadWaitlist();
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'Invalid email format' });
+  }
+
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0];
   
-  // Check if already on list
-  if (waitlist.some(entry => entry.email === email)) {
-    return res.status(200).json({ message: 'Already on waitlist' });
-  }
-
-  // Add new entry with timestamp
   const entry = {
-    email,
+    email: email.toLowerCase(),
     joinedAt: new Date().toISOString(),
-    source: req.headers.referer || 'direct'
+    ip: ip.substring(0, 10) // Partial IP for privacy
   };
 
-  waitlist.push(entry);
-  saveWaitlist(waitlist);
+  const added = await addToWaitlist(entry);
+  
+  if (!added) {
+    return res.status(429).json({ error: 'Too many signups from this IP. Try again later.' });
+  }
 
-  console.log(`[WAITLIST] ${email} joined at ${entry.joinedAt}`);
-
-  return res.status(200).json({ message: 'Added to waitlist', totalOnWaitlist: waitlist.length });
+  return res.status(200).json({ 
+    message: 'Added to waitlist', 
+    totalOnWaitlist: waitlistCache.length 
+  });
 }

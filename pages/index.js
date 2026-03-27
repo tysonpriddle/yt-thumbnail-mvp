@@ -174,7 +174,7 @@ export default function Home() {
               className={styles.searchInput}
               autoFocus
             />
-            <button type="submit" className={styles.ctaButton} disabled={loading}>
+            <button type="submit" className={styles.ctaButton} disabled={loading || !query.trim()}>
               {loading ? 'Searching...' : 'See Results'}
             </button>
           </form>
